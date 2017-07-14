@@ -152,7 +152,8 @@ C Type of Chebyshev parameterization:
       Chi2MaxError = 1.E10  ! turn off.
 
 C     Initialise LHAPDF parameters
-      LHAPDFSET = 'cteq65.LHgrid'
+      LHAPDFSET = 'cteq65.LHgrid
+      
       ILHAPDFSET = 0
       IPDFSET = 1
       vIPDFSET = IPDFSET
@@ -1074,6 +1075,10 @@ C---------------------------------------
          lead = .true. 
          deuteron = .true. 
          print *,'Fitting for DEUTERON PDFs, PDFType=', PDFType
+      elseif (PDFType.eq.'photon'.or. PDFType.eq.'PHOTON') then
+         lead = .false. 
+         deuteron = .false. 
+         print *,'Fitting PHOTON PDFs, PDFType=', PDFType
       else
          call hf_errlog(300920131,
      $   'F: Unsupported PDFType used!')

@@ -9,7 +9,7 @@ C
 C--------------------------------------------------------
       implicit none
 
-
+        
       double precision p(*)
       integer iflag
 #include "pdfparam.inc"
@@ -319,6 +319,10 @@ C  22 Sep 2011: AS parameterisation:
         if ((PDFStyle.eq.'AS').or.(PDFStyle.eq.'BiLog')) then
          Call DecodeASPara(p)
       endif
+      
+         if ((PDFStyle.eq.'Photon')) then
+         print*,'Photon parameterisation'
+      endif
 
 
 
@@ -526,7 +530,7 @@ C-----------------------------------------------------
       
       para = AF
       
-      print* , "use standard"
+      print* , 'Fit with standard'
 
       end
 
