@@ -152,7 +152,7 @@ C Type of Chebyshev parameterization:
       Chi2MaxError = 1.E10  ! turn off.
 
 C     Initialise LHAPDF parameters
-      LHAPDFSET = 'cteq65.LHgrid
+      LHAPDFSET = 'cteq65.LHgrid'
       
       ILHAPDFSET = 0
       IPDFSET = 1
@@ -1143,6 +1143,9 @@ cv         iparam = 301
          PDF_DECOMPOSITION = 'Diffractive'
       elseif (PDFStyle.eq.'QCDNUM_GRID') then
          PDF_DECOMPOSITION = 'QCDNUM_GRID'
+      elseif (PDFStyle.eq.'GAMMA') then 
+         PDF_DECOMPOSITION = 'Dv_Uv_Dbar_Ubar_Str'
+         print *,'PDFSTyle =',PDFStyle
       else
          print *,'Unsupported PDFStyle =',PDFStyle
          print *,'Check value in steering.txt'
