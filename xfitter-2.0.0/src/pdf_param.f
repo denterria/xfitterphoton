@@ -324,7 +324,7 @@ C  22 Sep 2011: AS parameterisation:
 C 14 Jun 2017: parametrisation for photon structur functions    
          if ((PDFStyle.eq.'GAMMA')) then
          print*,'Photon parameterisation'
-         Call DecodeGammaPARAPara(p)
+         Call DecodeGammaPara(p)
       endif
 
 
