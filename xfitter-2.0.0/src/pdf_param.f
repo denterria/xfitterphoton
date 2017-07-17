@@ -882,36 +882,7 @@ C---------------------------------------------------------
 
 
 
-      double precision function gamma(x,a)
-C----------------------------------------------------
-c     Para for photon structure functions
-c
-c
-c     S. Schulte, 
-c     Creation: 17/07/2017
-c  
-C-----------------------------------------------------
-      implicit none
-      double precision x,a(1:5)
-      double precision  splogn1
-      
-      splogn1=0.0d0
-      if (x.gt.0.d0.and.x.lt.1.d0) then
-         splogn1=A(1)*x**(A(2)-A(3)*log(x))*
-     $        (1.d0-x)**(A(4)-A(5)*log(1.d0-x))
-      endif
-
-
-      if (abs(splogn1).lt.1d30 .and. abs(splogn1).gt.1d-30) then
-c value in allowed range
-         splogn=splogn1
-      else
-         splogn=0.0d0
-      endif
-
-      return
-      end
-
+     
 
 
 * -------------------------------------------------------
