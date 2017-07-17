@@ -319,9 +319,12 @@ C  22 Sep 2011: AS parameterisation:
         if ((PDFStyle.eq.'AS').or.(PDFStyle.eq.'BiLog')) then
          Call DecodeASPara(p)
       endif
-      
-         if ((PDFStyle.eq.'Photon')) then
+    
+    
+C 14 Jun 2017: parametrisation for photon structur functions    
+         if ((PDFStyle.eq.'GAMMA')) then
          print*,'Photon parameterisation'
+         Call DecodeGammaPARAPara(p)
       endif
 
 
@@ -737,8 +740,177 @@ c value in allowed range
       return
       end
 
-      
+    
 
+    
+      subroutine DecodeGammaPARA(pars)
+C-------------------------------------------------------
+C  S.Schulte 17/07/2017 
+C   pars(1-10)  - gluon
+C   pars(11-20)  - Uv
+C   pars(21-30)  - Dv
+C   pars(31-40)  - Ubar, U
+C   pars(41-50)  - Dbar, D
+C   pars(51-60)  - sea, delta
+C   pars(91-100)  - others
+C------------------------------------------------------
+      implicit none 
+#include "pdfparam.inc"
+#include "steering.inc"
+#include "for_debug.inc"
+      double precision pars(*)
+      integer i,j
+      logical lfirstt
+      data lfirstt /.true./
+
+      double precision fs
+      double precision fshermes
+C---------------------------------------------------------
+      if (lfirstt) then
+         lfirstt = .false.
+         print *,'DecodeGammaPARA INFO: First time call'        
+      endif
+
+C Hermes strange prepare:
+      if (ifsttype.eq.0) then
+         fs = fstrange
+      else
+         fs = fshermes(0.D0)
+      endif
+
+C     simple copy first:
+      do i=1,10
+         parglue(i) = pars(i)
+         paruval(i) = pars(10+i)
+         pardval(i) = pars(20+i)
+         parubar(i) = pars(30+i)
+         pardbar(i) = pars(40+i)
+         paru(i) = pars(50+i)
+         pard(i) = pars(60+i)
+         parsea(i) = pars(70+i)
+         parstr(i) = pars(80+i)
+         parother(i) = pars(90+i)
+      enddo
+
+      if (PDF_DECOMPOSITION.eq.'D_U_Dbar_Ubar') then     !  H1PDF2k like
+
+         if (pard(2).eq.0)    pard(2)=paru(2)
+         if (parubar(2).eq.0) parubar(2)=paru(2)
+         if (pardbar(2).eq.0) pardbar(2)=paru(2)
+         if (pardbar(1).eq.0) pardbar(1)=pard(1)
+         if (paru(1).eq.0)    parU(1)=pard(1)*(1.D0-fs)/(1.D0-fcharm)
+         if (parUbar(1).eq.0) parUbar(1)=parU(1)
+cv        elseif (iparam.eq.2) then
+cv           if (pardval(2).eq.0)   pardval(2)=paruval(2) !  Bud    = Buv 
+cv           if (parubar(2).eq.0)   parubar(2)=pardbar(2) !  Bubar  = Bdbar
+cv         pardval(2)=paruval(2)
+cv         parubar(2)=pardbar(2)
+cv         parUbar(1)=pardbar(1)*(1.D0-fs)/(1.D0-fcharm)
+
+
+!> this style is common to HERAPDF, ATLASPDF:
+      elseif (index(PDF_DECOMPOSITION,'Dv_Uv_Dbar_Ubar_Str').ne.0) then
+
+         if (pardval(2).eq.0)   pardval(2)=paruval(2) !  Bud    = Buv 
+         if (parubar(2).eq.0)   parubar(2)=pardbar(2)  !  Bubar  = Bdbar 
+         if (parstr(1).eq.0.and.
+     $        parstr(2).eq.0.and.
+     $        parstr(3).eq.0) then
+            
+!> use coupled strange to Dbar
+            FreeStrange=.false.  
+            
+         else
+            FreeStrange=.true.
+         endif
+!> couple Bstr and Cstr to dbar when zero:
+         if (FreeStrange) then
+            if (parstr(2).eq.0.and.parstr(3).ne.0) parstr(2)=pardbar(2)
+            if (parstr(3).eq.0.and.parstr(2).ne.0) parstr(3)=pardbar(3)
+            
+         endif
+         
+         if (fs.ne.-10000.and.(FreeStrange)) then
+!> then use ubar and dbar (not Dbar and Ubar)
+            parstr(1)=fs/(1.-fs)*pardbar(1)
+            if (parubar(1).eq.0) parubar(1) = pardbar(1)
+         else                  
+!> then use Dbar and Ubar
+            if (parubar(1).eq.0)   parubar(1)=pardbar(1)*(1.D0-fs) 
+     $           /(1.D0-fcharm) !then use Ubar=Dbar
+         endif
+
+
+
+c      elseif (iparam.eq.3) then ! g,uval,dval,sea as in ZEUS-S 2002 fit
+c         
+c         paruval(2)=0.5
+c         pardval(2)=0.5
+c         parstr(2)=0.5
+c         parstr(3)=parsea(3)+2.
+         
+      elseif (PDFStyle.eq.'CHEB'.or.PDFStyle.eq.'ZEUS Jet') then
+         pardval(2)=paruval(2)
+        
+
+*  dbar-ubar (not Ubar - Dbar), Adel fixed to output of ZEUS-S fit   
+         parstr(1)=0.27
+         parstr(2)=0.5
+         parstr(3)=parsea(3)+2.
+
+c      elseif (iparam.eq.24) then ! g,uval,dval,sea as in ZEUS-JET fit
+c         pardval(2)=paruval(2)
+c         parstr(1)=0.27
+c         parstr(2)=0.5
+c         parstr(3)=parsea(3)+2.
+      endif         
+
+      if (debug) then
+         print '(''1uv:'',11F10.4)',(paruval(i),i=1,10)
+         print '(''1dv:'',11F10.4)',(pardval(i),i=1,10)
+         print '(''1Ub:'',11F10.4)',(parubar(i),i=1,10)
+         print '(''1Db:'',11F10.4)',(pardbar(i),i=1,10)
+         print '(''1GL:'',11F10.4)',(parglue(i),i=1,10)
+         print '(''1ST:'',11F10.4)',(parstr(i),i=1,10)
+          if (ITheory.eq.11) then
+             print '(''1PH:'',11F10.4)',(parphoton(i),i=1,10)
+          endif
+      endif
+
+C---------------------------------------------------------
+      end
+
+
+
+      double precision function gamma(x,a)
+C----------------------------------------------------
+c     Para for photon structure functions
+c
+c
+c     S. Schulte, 
+c     Creation: 17/07/2017
+c  
+C-----------------------------------------------------
+      implicit none
+      double precision x,a(1:5)
+      double precision  splogn1
+      
+      splogn1=0.0d0
+      if (x.gt.0.d0.and.x.lt.1.d0) then
+         splogn1=A(1)*x**(A(2)-A(3)*log(x))*
+     $        (1.d0-x)**(A(4)-A(5)*log(1.d0-x))
+      endif
+
+
+      if (abs(splogn1).lt.1d30 .and. abs(splogn1).gt.1d-30) then
+c value in allowed range
+         splogn=splogn1
+      else
+         splogn=0.0d0
+      endif
+
+      return
+      end
 
 
 
@@ -773,6 +945,14 @@ C    22 Sept 11, VR, Add AS
          gluon = splogn(x,asglue)
          return
       endif
+C    17 july 17, photon
+      if (PDFStyle.eq.'GAMMA') then
+         print* , 'GLUON!!!!!!!'
+         return
+      endif
+      
+      
+      
       if (nchebglu.eq.0) then
 
 !> HERAPDF style goes in here:
@@ -789,6 +969,7 @@ C Do nothing
          endif
          
       endif
+      
       end
 
 * -------------------------------------------------------
