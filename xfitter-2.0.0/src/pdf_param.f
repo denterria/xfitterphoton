@@ -741,11 +741,21 @@ c value in allowed range
       end
 
     
-
+C------------------------------------------------------------
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
     
       subroutine DecodeGammaPARA(pars)
 C-------------------------------------------------------
-C  S.Schulte 17/07/2017 
+C  S.Schulte 17/07/2017 decode minuit input for photon structur param. 
 C   pars(1-10)  - gluon
 C   pars(11-20)  - Uv
 C   pars(21-30)  - Dv
@@ -753,7 +763,8 @@ C   pars(31-40)  - Ubar, U
 C   pars(41-50)  - Dbar, D
 C   pars(51-60)  - sea, delta
 C   pars(91-100)  - others
-C------------------------------------------------------
+
+C---------------------------------------------------------
       implicit none 
 #include "pdfparam.inc"
 #include "steering.inc"
@@ -763,21 +774,11 @@ C------------------------------------------------------
       logical lfirstt
       data lfirstt /.true./
 
-      double precision fs
-      double precision fshermes
-C---------------------------------------------------------
-      if (lfirstt) then
-         lfirstt = .false.
-         print *,'DecodeGammaPARA INFO: First time call'        
-      endif
-
-C Hermes strange prepare:
-      if (ifsttype.eq.0) then
-         fs = fstrange
-      else
-         fs = fshermes(0.D0)
-      endif
-
+  
+C---------------------------------------------------------     
+     
+      print* , 'CALL DecodeGammaPARA'
+      
 C     simple copy first:
       do i=1,10
          parglue(i) = pars(i)
@@ -791,98 +792,31 @@ C     simple copy first:
          parstr(i) = pars(80+i)
          parother(i) = pars(90+i)
       enddo
-
-      if (PDF_DECOMPOSITION.eq.'D_U_Dbar_Ubar') then     !  H1PDF2k like
-
-         if (pard(2).eq.0)    pard(2)=paru(2)
-         if (parubar(2).eq.0) parubar(2)=paru(2)
-         if (pardbar(2).eq.0) pardbar(2)=paru(2)
-         if (pardbar(1).eq.0) pardbar(1)=pard(1)
-         if (paru(1).eq.0)    parU(1)=pard(1)*(1.D0-fs)/(1.D0-fcharm)
-         if (parUbar(1).eq.0) parUbar(1)=parU(1)
-cv        elseif (iparam.eq.2) then
-cv           if (pardval(2).eq.0)   pardval(2)=paruval(2) !  Bud    = Buv 
-cv           if (parubar(2).eq.0)   parubar(2)=pardbar(2) !  Bubar  = Bdbar
-cv         pardval(2)=paruval(2)
-cv         parubar(2)=pardbar(2)
-cv         parUbar(1)=pardbar(1)*(1.D0-fs)/(1.D0-fcharm)
-
-
-!> this style is common to HERAPDF, ATLASPDF:
-      elseif (index(PDF_DECOMPOSITION,'Dv_Uv_Dbar_Ubar_Str').ne.0) then
-
-         if (pardval(2).eq.0)   pardval(2)=paruval(2) !  Bud    = Buv 
-         if (parubar(2).eq.0)   parubar(2)=pardbar(2)  !  Bubar  = Bdbar 
-         if (parstr(1).eq.0.and.
-     $        parstr(2).eq.0.and.
-     $        parstr(3).eq.0) then
-            
-!> use coupled strange to Dbar
-            FreeStrange=.false.  
-            
-         else
-            FreeStrange=.true.
-         endif
-!> couple Bstr and Cstr to dbar when zero:
-         if (FreeStrange) then
-            if (parstr(2).eq.0.and.parstr(3).ne.0) parstr(2)=pardbar(2)
-            if (parstr(3).eq.0.and.parstr(2).ne.0) parstr(3)=pardbar(3)
-            
-         endif
-         
-         if (fs.ne.-10000.and.(FreeStrange)) then
-!> then use ubar and dbar (not Dbar and Ubar)
-            parstr(1)=fs/(1.-fs)*pardbar(1)
-            if (parubar(1).eq.0) parubar(1) = pardbar(1)
-         else                  
-!> then use Dbar and Ubar
-            if (parubar(1).eq.0)   parubar(1)=pardbar(1)*(1.D0-fs) 
-     $           /(1.D0-fcharm) !then use Ubar=Dbar
-         endif
-
-
-
-c      elseif (iparam.eq.3) then ! g,uval,dval,sea as in ZEUS-S 2002 fit
-c         
-c         paruval(2)=0.5
-c         pardval(2)=0.5
-c         parstr(2)=0.5
-c         parstr(3)=parsea(3)+2.
-         
-      elseif (PDFStyle.eq.'CHEB'.or.PDFStyle.eq.'ZEUS Jet') then
-         pardval(2)=paruval(2)
-        
-
-*  dbar-ubar (not Ubar - Dbar), Adel fixed to output of ZEUS-S fit   
-         parstr(1)=0.27
-         parstr(2)=0.5
-         parstr(3)=parsea(3)+2.
-
-c      elseif (iparam.eq.24) then ! g,uval,dval,sea as in ZEUS-JET fit
-c         pardval(2)=paruval(2)
-c         parstr(1)=0.27
-c         parstr(2)=0.5
-c         parstr(3)=parsea(3)+2.
-      endif         
-
-      if (debug) then
-         print '(''1uv:'',11F10.4)',(paruval(i),i=1,10)
-         print '(''1dv:'',11F10.4)',(pardval(i),i=1,10)
-         print '(''1Ub:'',11F10.4)',(parubar(i),i=1,10)
-         print '(''1Db:'',11F10.4)',(pardbar(i),i=1,10)
-         print '(''1GL:'',11F10.4)',(parglue(i),i=1,10)
-         print '(''1ST:'',11F10.4)',(parstr(i),i=1,10)
-          if (ITheory.eq.11) then
-             print '(''1PH:'',11F10.4)',(parphoton(i),i=1,10)
-          endif
-      endif
-
-C---------------------------------------------------------
+   
+      
+    
       end
 
 
-
+C------------------------------------------------------------
      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 * -------------------------------------------------------
@@ -1056,6 +990,12 @@ C    22 Sep 11, VR, Add AS
          UVal = splogn(x,asuval)
          return
       endif
+C    17 july 17, photon
+      if (PDFStyle.eq.'GAMMA') then
+         print* , 'U valenz!!!!!!!'
+         return
+      endif
+            
 
 C
 C 25 Jan 2011: add polynomial param 
@@ -1100,6 +1040,12 @@ C    22 Sep 11, VR, Add AS
          DVal = splogn(x,asdval)
          return
       endif
+C    17 july 17, photon
+      if (PDFStyle.eq.'GAMMA') then
+         print* , 'D valenz!!!!!!!'
+         return
+      endif
+      
 
 
 C
@@ -1251,6 +1197,13 @@ C----------------------------------------------------
       else
          qstrange = fs * Dbar(x)
       endif
+      
+      
+      if (PDFStyle.eq.'GAMMA') then
+         print* , 'qstrange!!!!!!!'
+         return
+      endif
+      
 
 
 c      elseif (iparam.eq.222222.or.iparam.eq.222223) then
@@ -1330,6 +1283,12 @@ C    22 Apr 11, SG, Add CTEQ-like
          Ubar = (0.5d0 * sea(x) - dbmub(x) - qstrange (x) + cbar(x))/2.d0
          return
       endif
+          if (PDFStyle.eq.'GAMMA') then
+         print* , 'Ubar!!!!!!!'
+         return
+      endif
+      
+      
      
 cv      elseif (iparam.eq.222222.or.iparam.eq.222223
 cv     $        .or.iparam.eq.2011) then
@@ -1389,6 +1348,11 @@ C    22 Apr 11, SG, Add CTEQ-like
          Dbar = sea(x) * 0.5d0 - Ubar(x)
          return
       endif
+          if (PDFStyle.eq.'GAMMA') then
+         print* , 'DBar!!!!!!!'
+         return
+      endif
+      
 
 !      elseif(iparam.eq.222222.or.iparam.eq.222223) then
 !         Dbar=para(x,pardbar)/(1-fstrange)
