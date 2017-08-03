@@ -286,7 +286,7 @@ C Hermes strange prepare:
 C 10 Aug 2011: Standard parametrisation:
       if ((idphA.ne.0).or.(idphB.ne.0).or.(idphC.ne.0).or. 
      $    (idphD.ne.0).or.(idphE.ne.0))then
-         parphoton(1)= p(idphA)
+         parphoton(1)= p(idphA) 
          parphoton(2)= p(idphB)
          parphoton(3)= p(idphC)
          parphoton(4)= p(idphD)
@@ -320,7 +320,11 @@ C  22 Sep 2011: AS parameterisation:
          Call DecodeASPara(p)
       endif
 
-
+C  4 Aug 2017 S. Schulte: photon structur function parameterisation :
+        if (PDFStyle.eq.'F2_GAMMA') then
+         Call DecodeF2Para(p)
+      endif
+      
 
 C
 C Chebyshev for the gluon:
@@ -512,6 +516,23 @@ C---------------------------------------------------------
 
 
 
+      subroutine DecodeF2Para(pars)
+C-------------------------------------------------------
+C Created 4. Aug 2017 by S.Schulte Decode minuit input for F2 param.
+C   pars(1-10)  - gluon
+C   pars(11-20)  - Uv
+C   pars(21-30)  - Dv
+C   pars(31-40)  - Ubar, U
+C   pars(41-50)  - Dbar, D
+C   pars(51-60)  - sea, delta
+C   pars(91-100)  - others
+C------------------------------------------------------
+        print *, 'Use F2_Gamma fit'
+
+C---------------------------------------------------------
+      end
+
+C---------------------------
 
 
 

@@ -1074,6 +1074,10 @@ C---------------------------------------
          lead = .true. 
          deuteron = .true. 
          print *,'Fitting for DEUTERON PDFs, PDFType=', PDFType
+      elseif (PDFType.eq.'photon'.or. PDFType.eq.'PHOTON') then
+         lead = .false. 
+         deuteron = .false. 
+         print *,'Fitting for Photons PDFs, PDFType=', PDFType
       else
          call hf_errlog(300920131,
      $   'F: Unsupported PDFType used!')
@@ -1112,7 +1116,7 @@ C---------------------------------
       elseif (PDFStyle.eq.'CTEQ') then
 !         FreeStrange=.false.
          PDF_DECOMPOSITION = 'Dv_Uv_Dbar_Ubar_Str'
-
+    
 
       elseif ((PDFStyle.eq.'AS').or.(PDFStyle.eq.'BiLog')) then
          FreeStrange=.false.
@@ -1138,6 +1142,12 @@ cv         iparam = 301
          PDF_DECOMPOSITION = 'Diffractive'
       elseif (PDFStyle.eq.'QCDNUM_GRID') then
          PDF_DECOMPOSITION = 'QCDNUM_GRID'
+         
+      elseif (PDFStyle.eq.'F2_GAMMA') then
+         FlexibleGluon = .true.
+         PDF_DECOMPOSITION = 'Dv_Uv_Dbar_Ubar_Str
+      
+      
       else
          print *,'Unsupported PDFStyle =',PDFStyle
          print *,'Check value in steering.txt'
