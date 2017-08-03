@@ -9,7 +9,7 @@ C
 C--------------------------------------------------------
       implicit none
 
-        
+
       double precision p(*)
       integer iflag
 #include "pdfparam.inc"
@@ -319,13 +319,6 @@ C  22 Sep 2011: AS parameterisation:
         if ((PDFStyle.eq.'AS').or.(PDFStyle.eq.'BiLog')) then
          Call DecodeASPara(p)
       endif
-    
-    
-C 14 Jun 2017: parametrisation for photon structur functions    
-         if ((PDFStyle.eq.'GAMMA')) then
-         print*,'Photon parameterisation'
-         Call DecodeGammaPara(p)
-      endif
 
 
 
@@ -516,6 +509,15 @@ C---------------------------------------------------------
 
 C---------------------------------------------------------
 
+
+
+
+
+
+
+
+
+
       double precision function para(x,a)
 C----------------------------------------------------
 C
@@ -532,8 +534,6 @@ C-----------------------------------------------------
      $     + a(5)*x**2+a(6)*x**3+a(10)*x**0.5)-a(7)*x**a(8)*(1-x)**a(9)
       
       para = AF
-      
-      print* , 'Fit with standard'
 
       end
 
@@ -740,81 +740,7 @@ c value in allowed range
       return
       end
 
-    
-C------------------------------------------------------------
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-    
-      subroutine DecodeGammaPARA(pars)
-C-------------------------------------------------------
-C  S.Schulte 17/07/2017 decode minuit input for photon structur param. 
-C   pars(1-10)  - gluon
-C   pars(11-20)  - Uv
-C   pars(21-30)  - Dv
-C   pars(31-40)  - Ubar, U
-C   pars(41-50)  - Dbar, D
-C   pars(51-60)  - sea, delta
-C   pars(91-100)  - others
-
-C---------------------------------------------------------
-      implicit none 
-#include "pdfparam.inc"
-#include "steering.inc"
-#include "for_debug.inc"
-      double precision pars(*)
-      integer i,j
-      logical lfirstt
-      data lfirstt /.true./
-
-  
-C---------------------------------------------------------     
-     
-      print* , 'CALL DecodeGammaPARA'
       
-C     simple copy first:
-      do i=1,10
-         parglue(i) = pars(i)
-         paruval(i) = pars(10+i)
-         pardval(i) = pars(20+i)
-         parubar(i) = pars(30+i)
-         pardbar(i) = pars(40+i)
-         paru(i) = pars(50+i)
-         pard(i) = pars(60+i)
-         parsea(i) = pars(70+i)
-         parstr(i) = pars(80+i)
-         parother(i) = pars(90+i)
-      enddo
-   
-      
-    
-      end
-
-
-C------------------------------------------------------------
-     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -850,14 +776,6 @@ C    22 Sept 11, VR, Add AS
          gluon = splogn(x,asglue)
          return
       endif
-C    17 july 17, photon
-      if (PDFStyle.eq.'GAMMA') then
-         print* , 'GLUON!!!!!!!'
-         return
-      endif
-      
-      
-      
       if (nchebglu.eq.0) then
 
 !> HERAPDF style goes in here:
@@ -874,7 +792,6 @@ C Do nothing
          endif
          
       endif
-      
       end
 
 * -------------------------------------------------------
@@ -990,12 +907,6 @@ C    22 Sep 11, VR, Add AS
          UVal = splogn(x,asuval)
          return
       endif
-C    17 july 17, photon
-      if (PDFStyle.eq.'GAMMA') then
-         print* , 'U valenz!!!!!!!'
-         return
-      endif
-            
 
 C
 C 25 Jan 2011: add polynomial param 
@@ -1040,12 +951,6 @@ C    22 Sep 11, VR, Add AS
          DVal = splogn(x,asdval)
          return
       endif
-C    17 july 17, photon
-      if (PDFStyle.eq.'GAMMA') then
-         print* , 'D valenz!!!!!!!'
-         return
-      endif
-      
 
 
 C
@@ -1197,13 +1102,6 @@ C----------------------------------------------------
       else
          qstrange = fs * Dbar(x)
       endif
-      
-      
-      if (PDFStyle.eq.'GAMMA') then
-         print* , 'qstrange!!!!!!!'
-         return
-      endif
-      
 
 
 c      elseif (iparam.eq.222222.or.iparam.eq.222223) then
@@ -1283,12 +1181,6 @@ C    22 Apr 11, SG, Add CTEQ-like
          Ubar = (0.5d0 * sea(x) - dbmub(x) - qstrange (x) + cbar(x))/2.d0
          return
       endif
-          if (PDFStyle.eq.'GAMMA') then
-         print* , 'Ubar!!!!!!!'
-         return
-      endif
-      
-      
      
 cv      elseif (iparam.eq.222222.or.iparam.eq.222223
 cv     $        .or.iparam.eq.2011) then
@@ -1348,11 +1240,6 @@ C    22 Apr 11, SG, Add CTEQ-like
          Dbar = sea(x) * 0.5d0 - Ubar(x)
          return
       endif
-          if (PDFStyle.eq.'GAMMA') then
-         print* , 'DBar!!!!!!!'
-         return
-      endif
-      
 
 !      elseif(iparam.eq.222222.or.iparam.eq.222223) then
 !         Dbar=para(x,pardbar)/(1-fstrange)

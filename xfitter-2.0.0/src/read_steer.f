@@ -153,7 +153,6 @@ C Type of Chebyshev parameterization:
 
 C     Initialise LHAPDF parameters
       LHAPDFSET = 'cteq65.LHgrid'
-      
       ILHAPDFSET = 0
       IPDFSET = 1
       vIPDFSET = IPDFSET
@@ -1075,10 +1074,6 @@ C---------------------------------------
          lead = .true. 
          deuteron = .true. 
          print *,'Fitting for DEUTERON PDFs, PDFType=', PDFType
-      elseif (PDFType.eq.'photon'.or. PDFType.eq.'PHOTON') then
-         lead = .false. 
-         deuteron = .false. 
-         print *,'Fitting PHOTON PDFs, PDFType=', PDFType
       else
          call hf_errlog(300920131,
      $   'F: Unsupported PDFType used!')
@@ -1143,9 +1138,6 @@ cv         iparam = 301
          PDF_DECOMPOSITION = 'Diffractive'
       elseif (PDFStyle.eq.'QCDNUM_GRID') then
          PDF_DECOMPOSITION = 'QCDNUM_GRID'
-      elseif (PDFStyle.eq.'GAMMA') then 
-         PDF_DECOMPOSITION = 'Dv_Uv_Dbar_Ubar_Str'
-         print *,'PDFSTyle =',PDFStyle
       else
          print *,'Unsupported PDFStyle =',PDFStyle
          print *,'Check value in steering.txt'
