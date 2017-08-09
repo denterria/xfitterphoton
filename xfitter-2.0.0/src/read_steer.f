@@ -1060,9 +1060,13 @@ C---------------------------------------
 
       implicit none
 #include "steering.inc"
+    
+      if (PDFType.eq.'photon'.or. PDFType.eq.'PHOTON') then
+         lead = .false. 
+         deuteron = .false. 
+         print *,'Fitting for Photons PDFs, PDFType=', PDFType
 
-
-      if (PDFType.eq.'proton'.or. PDFType.eq.'PROTON') then
+      elseif (PDFType.eq.'proton'.or. PDFType.eq.'PROTON') then
          lead = .false.
          deuteron = .false.
          print *,'Fitting for PROTON PDFs, PDFType=', PDFType
@@ -1074,10 +1078,6 @@ C---------------------------------------
          lead = .true. 
          deuteron = .true. 
          print *,'Fitting for DEUTERON PDFs, PDFType=', PDFType
-      elseif (PDFType.eq.'photon'.or. PDFType.eq.'PHOTON') then
-         lead = .false. 
-         deuteron = .false. 
-         print *,'Fitting for Photons PDFs, PDFType=', PDFType
       else
          call hf_errlog(300920131,
      $   'F: Unsupported PDFType used!')
@@ -1145,7 +1145,7 @@ cv         iparam = 301
          
       elseif (PDFStyle.eq.'F2_GAMMA') then
          FlexibleGluon = .true.
-         PDF_DECOMPOSITION = 'Dv_Uv_Dbar_Ubar_Str
+         PDF_DECOMPOSITION = 'Dv_Uv_Dbar_Ubar_Str'
       
       
       else

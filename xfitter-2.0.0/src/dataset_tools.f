@@ -208,10 +208,10 @@ C Count number of dataset indices
                  endif
                enddo
                
-               print ' ("ProcessName  ",A80)',ProcessName(i)
-               print ' ("Variable:    ",A80)',Variable(i)
-               print ' ("CutValueMin: ",E15.5)',CutValueMin(i)
-               print ' ("CutValueMax: ",E15.5)',CutValueMax(i)
+              ! print ' ("ProcessName  ",A80)',ProcessName(i)
+              ! print ' ("Variable:    ",A80)',Variable(i)
+               !print ' ("CutValueMin: ",E15.5)',CutValueMin(i)
+               !print ' ("CutValueMax: ",E15.5)',CutValueMax(i)
                do j=1,NDataset(i)
                  print ' ("Dataset(",I0,"): ",I6)',j,Dataset(j,i)
                enddo
