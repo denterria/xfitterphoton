@@ -286,7 +286,7 @@ C Hermes strange prepare:
 C 10 Aug 2011: Standard parametrisation:
       if ((idphA.ne.0).or.(idphB.ne.0).or.(idphC.ne.0).or. 
      $    (idphD.ne.0).or.(idphE.ne.0))then
-         parphoton(1)= p(idphA) 
+         parphoton(1)= p(idphA)
          parphoton(2)= p(idphB)
          parphoton(3)= p(idphC)
          parphoton(4)= p(idphD)
@@ -320,11 +320,7 @@ C  22 Sep 2011: AS parameterisation:
          Call DecodeASPara(p)
       endif
 
-C  4 Aug 2017 S. Schulte: photon structur function parameterisation :
-        if (PDFStyle.eq.'F2_GAMMA') then
-         Call DecodePara(p)
-      endif
-      
+
 
 C
 C Chebyshev for the gluon:
@@ -514,198 +510,33 @@ C---------------------------------------------------------
 C---------------------------------------------------------
 
 
-C#######################################################################
-
-      subroutine DecodeF2Para(pars)
-C-------------------------------------------------------
-C Created 4. Aug 2017 by S.Schulte Decode minuit input for F2 param.
-C   pars(1-10)  - gluon
-C   pars(11-20)  - Uv
-C   pars(21-30)  - Dv
-C   pars(31-40)  - Ubar, U
-C   pars(41-50)  - Dbar, D
-C   pars(51-60)  - sea, delta
-C   pars(91-100)  - others
-C------------------------------------------------------
-        print *, 'F2_Gamma Fit'
-        
 
 
-        end
-
-C#######################################################################
 
 
-      double precision function paraFL(x,S)
+
+
+
+
+      double precision function para(x,a)
+C----------------------------------------------------
 C
-C******************************************************************
-C* Functional form of the distribution function of light partons. *
-C* S = log( log(Q**2/.232^2) / log(.25/.232^2) ) (LO),            *
-C* S = log( log(Q**2/.248^2) / log(.3/.248^2) )  (HO).            *
-C******************************************************************
+C standard-like parameterisation: 
+C  AF = (a*x**b)*(1 - x)**c*(1 + d*x + e*x**2+f*x**3)-
+C     - (ap*x**bp)*(1-x)**cp
 C
 C-----------------------------------------------------
       implicit none
-      double precision x,S
-      double precision FL
-      common /param /ALP,BET,A,B,BA,BB,C,D,E,EP,SP
-    
-    
-      FL = ( X**A * (BA+BB*DSQRT(X)+C*X**B) +
-     &       S**ALP * DEXP(-E+DSQRT(-EP*S**BET*DLOG(X))) ) *
-     &     (1.D0-X)**D/X
-     
-      paraFL = FL
+      double precision x,a(1:10)
+      double precision AF
       
+      AF = a(1)*x**a(2)*(1 - x)**a(3)*(1 + a(4)*x
+     $     + a(5)*x**2+a(6)*x**3+a(10)*x**0.5)-a(7)*x**a(8)*(1-x)**a(9)
       
-      return
-      end
-      
-      
-      double precision function paraFH(x,S)
-C*************************************************
-C* Same as FL, but for the heavy s, c, b quarks. *
-C*************************************************
-      implicit none
-      double precision x,S
-      double precision FH
-      common /param /ALP,BET,A,B,BA,BB,C,D,E,EP,SP
-      
-      FH = ( (S-SP) * X**A * (BA+BB*DSQRT(X)+C*X**B) +
-     &       (S-SP)**ALP * DEXP(-E+DSQRT(-EP*S**BET*DLOG(X))) ) *
-     &     (1.D0-X)**D/X
-     
-        paraFH = FH
-        
-      return
-      end  
-     
+      para = AF
 
-      
-      
-C-----------------------------------------------------------------------      
-      
-      double precision function paragluonF2(x,Q2)
-      
-      
-      implicit none
-      common /param /ALP,BET,A,B,BA,BB,C,D,E,EP,SP
-      double precision x,Q2
-      
-      S = DLOG( DLOG(18.58D0*Q2)/1.536D0 )
-      RTS = DSQRT(S)
-      S2 = S*S
-      ALP = .676D0
-      BET = 1.089D0
-      A = .462D0 - .524D0*RTS
-      B = 5.451D0 - .804D0*S2
-      BA = .535D0 - .504D0*RTS + .288D0*S2
-      BB = .364D0 - .52D0*S
-      C = -.323D0 + .115D0*S2
-      D = .233D0 + .79D0*S - .139D0*S2
-      E = .893D0 + 1.968D0*S
-      EP = 3.432D0 + .392D0*S
-      
-      paragluonF2 = paraFL(x,S)
-      
-      return
       end
-      
-      double precision function paraupF2(x,Q2)
-      
-C**********************************************************************
-C* Higher order up-quark distributions. X is Bjorken-x, and Q2 is the *
-C* factorization scale. Recall that alpha_em has been factored out.   *
-C* The parametrization is supposed to be  valid for x > 10**-5,       *
-C* Q**2 < 10**6 GeV**2.                                               *
-C* WARNING: These distributions are in the DIS_gamma scheme; to trans-*
-C* late them into MSbar, a term proportional to B_gamma must be added.*
-C**********************************************************************
-      
-      implicit none
-      common /param /ALP,BET,A,B,BA,BB,C,D,E,EP,SP
-      double precision x,Q2
-        
-      S = DLOG ( DLOG(Q2*16.26D0)/1.585D0 )
-      RTS = DSQRT(S)
-      S2 = S*S
-      ALP = .583D0
-      BET = .688D0
-      A = .449D0 - .025D0*S - .071D0*S2
-      B = 5.06D0 - 1.116D0*RTS
-      BA = .103D0
-      BB = .319D0 + .422D0*S
-      C = 1.508D0 + 4.792D0*S - 1.963D0*S2
-      D = 1.075D0 +.222D0*RTS - .193D0*S2
-      E = 4.147D0 + 1.131D0*S
-      EP = 1.661D0 + .874D0*S
-      
-      
-      paraupF2 = paraFL(X,S)
-     
-      return  
-      end
-      
-      double precision function paradF2(x,Q2)
-      end
-      
-      double precision function paracF2(x,Q2)
-      end
-      
-      double precision function parasF2(x,Q2)
-      end
-      
-      double precision function parabF2(x,Q2)
-      end
-    
-      double precision function paraupbarF2(x,Q2)
-      
-C**********************************************************************
-C* Higher order up-quark distributions. X is Bjorken-x, and Q2 is the *
-C* factorization scale. Recall that alpha_em has been factored out.   *
-C* The parametrization is supposed to be  valid for x > 10**-5,       *
-C* Q**2 < 10**6 GeV**2.                                               *
-C* WARNING: These distributions are in the DIS_gamma scheme; to trans-*
-C* late them into MSbar, a term proportional to B_gamma must be added.*
-C**********************************************************************
-      
-      implicit none
-      common /param /ALP,BET,A,B,BA,BB,C,D,E,EP,SP
-      double precision x,Q2
-        
-      S = DLOG ( DLOG(Q2*16.26D0)/1.585D0 )
-      RTS = DSQRT(S)
-      S2 = S*S
-      ALP = .583D0
-      BET = .688D0
-      A = .449D0 - .025D0*S - .071D0*S2
-      B = 5.06D0 - 1.116D0*RTS
-      BA = .103D0
-      BB = .319D0 + .422D0*S
-      C = 1.508D0 + 4.792D0*S - 1.963D0*S2
-      D = 1.075D0 +.222D0*RTS - .193D0*S2
-      E = 4.147D0 + 1.131D0*S
-      EP = 1.661D0 + .874D0*S
-      
-      
-      paraupF2 = paraFL(X,S)
-     
-      return  
-      end
-      
-      double precision function paradbarF2(x,Q2)
-      end
-      
-      double precision function paracbarF2(x,Q2)
-      end
-      
-      double precision function parasbarF2(x,Q2)
-      end
-      
-      double precision function parabbarF2(x,Q2)
-      end
-      
-C#######################################################################
+
 
 
       subroutine DecodeCtPara(pars)
@@ -910,6 +741,10 @@ c value in allowed range
       end
 
       
+
+
+
+
 * -------------------------------------------------------
       double precision function gluon(x)
 * -------------------------------------------------------
@@ -921,22 +756,15 @@ c value in allowed range
       double precision x
       integer i
 C External function:
-      double precision PolyParam,ctpara,ctherapara,para,splogn, paraF2
-
+      double precision PolyParam,ctpara,ctherapara,para,splogn
 C-------------------------------------------------
-   
-C  04 Aug 17, S. Schulte   
-      if (PDFStyle.eq.'F2_GAMMA') then
-         gluon = paragluonF2(x,parglue)
-         return
-      endif
+
 
 C    22 Apr 11, SG, Add CTEQ-like
       if (PDFStyle.eq.'CTEQ') then
          gluon = ctpara(x,ctglue)
          return
       endif
-      
 
       if (PDFStyle.eq.'CTEQHERA') then
          gluon = ctherapara(x,ctglue)
@@ -979,7 +807,6 @@ C Do nothing
 C External function:
       double precision ctpara,ctherapara,para
 C-------------------------------------------------
-
 
 
 C    22 Apr 11, SG, Add CTEQ-like
@@ -1030,15 +857,9 @@ C---------------------------------
 #include "steering.inc"
 #include "pdfparam.inc"
       double precision x,para
-      
-      
-      C  04 Aug 17, S. Schulte   
-      if (PDFStyle.eq.'F2_GAMMA') then
-        H1U= paragluonF2(x,parglue)
-         return
-      else
 
-        
+
+
       H1U=para(x,paru)
 
 
@@ -1070,13 +891,7 @@ C---------------------------------
       double precision PolyVal,ctpara,ctherapara,para,splogn
 C---------------------------------------------------
 
-
-C  04 Aug 17, S. Schulte   
-      if (PDFStyle.eq.'F2_GAMMA') then
-        print*, 'Uval para'
-         return
-      endif
-  
+C    22 Apr 11, SG, Add CTEQ-like
       if (PDFStyle.eq.'CTEQ') then
          UVal = ctpara(x,ctuval)
          return
@@ -1122,13 +937,7 @@ C
       double precision PolyVal,ctpara,ctherapara,para,splogn
 C--------------------------------------------------------
 
-C  04 Aug 17, S. Schulte   
-      if (PDFStyle.eq.'F2_GAMMA') then
-        print*, 'Uval para'
-         return
-      endif
 C    22 Apr 11, SG, Add CTEQ-like
-
       if (PDFStyle.eq.'CTEQ') then
          DVal = ctpara(x,ctdval)
          return
