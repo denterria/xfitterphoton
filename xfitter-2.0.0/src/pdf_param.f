@@ -510,7 +510,41 @@ C---------------------------------------------------------
 C---------------------------------------------------------
 
 
+C#######################################################################
+C# 16 Aug 2017 S.Schulte 
+C# Fit of F_2 gamma
 
+
+      double precision function paraF2HO(x,a)
+C Parametrization based on GRV HO
+
+      implicit none
+      double precision x, a(1:100)
+      double precision FL
+      
+      
+      
+      
+      
+      
+            REAL*8 FUNCTION FL(X,S)
+C******************************************************************
+C* Functional form of the distribution function of light partons. *
+C* S = log( log(Q**2/.232^2) / log(.25/.232^2) ) (LO),            *
+C* S = log( log(Q**2/.248^2) / log(.3/.248^2) )  (HO).            *
+C******************************************************************
+      IMPLICIT REAL*8 (A-H,M,O-Z)
+      COMMON /GRVPAR/ ALP,BET,A,B,BA,BB,C,D,E,EP,SP
+      FL = ( X**A * (BA+BB*DSQRT(X)+C*X**B) +
+     &       S**ALP * DEXP(-E+DSQRT(-EP*S**BET*DLOG(X))) ) *
+     &     (1.D0-X)**D/X
+      RETURN
+      END
+      
+      
+      end
+
+C#######################################################################
 
 
 
