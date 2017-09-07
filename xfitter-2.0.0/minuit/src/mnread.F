@@ -125,6 +125,8 @@ C              if line starts with SET TITLE, read a title first
          GO TO 10
          ENDIF
 C                      we really have parameter definitions now
+      print*, 'Hallo world'
+      print*, CRDBUF
       CALL MNPARS(CRDBUF,ICONDP)
       IF (ICONDP .EQ. 0)  GO TO 10
 C          format error

@@ -12,6 +12,8 @@ C !> Standard parameterisation
      $      parglue,paru,pard,parstr,parsea,parother,parphoton
 
 C---
+
+
        double precision fcharm,fstrange !> charm, strange fractions
        common/pdfparam/fcharm,fstrange
     

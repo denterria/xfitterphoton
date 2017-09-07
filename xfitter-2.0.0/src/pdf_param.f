@@ -510,46 +510,65 @@ C---------------------------------------------------------
 C---------------------------------------------------------
 
 
-C#######################################################################
-C# 16 Aug 2017 S.Schulte 
-C# Fit of F_2 gamma
+
+C########################################################
+C#  21 Aug 2017 S.Schulte
 
 
-      double precision function paraF2HO(x,a)
-C Parametrization based on GRV HO
+C########################################################
 
+      double precision function paraF2(x,a)
+C----------------------------------------------------
+C
+C GRV Parametrization for F2_Gamma light quarks and gluons
+C
+C-----------------------------------------------------
       implicit none
-      double precision x, a(1:100)
-      double precision FL
+      double precision x,a(1:10)
+      double precision FL,S,Q2
+      
+      Q2 = 1.9
+      
+      S = DLOG( DLOG(18.58D0*Q2)/1.536D0 )
+      FL = ( X**a(1) * (a(3)+a(4)*DSQRT(X)+a(5)*X**a(2)) +
+     &       S**a(6) * DEXP(-a(7)+DSQRT(-a(8)*S**a(9)*DLOG(X))) ) *
+     &     (1.D0-X)**a(10)/X
+    
+        
+      paraF2 = FL
+
+      
+    
+      end
+
+
+
+      double precision function paraF2H(x,a)
+C----------------------------------------------------
+C
+C GRV Parametrization for F2_Gamma heavy quarks s, c, b
+C
+C-----------------------------------------------------      
+      implicit none 
+      double precision x, a(1:11)
+      double precision FH,S,Q2  
+      
+      Q2 = 1.9
+      
+      S = DLOG( DLOG(18.58D0*Q2)/1.536D0 )
       
       
-      
-      
-      
-      
-            REAL*8 FUNCTION FL(X,S)
-C******************************************************************
-C* Functional form of the distribution function of light partons. *
-C* S = log( log(Q**2/.232^2) / log(.25/.232^2) ) (LO),            *
-C* S = log( log(Q**2/.248^2) / log(.3/.248^2) )  (HO).            *
-C******************************************************************
-      IMPLICIT REAL*8 (A-H,M,O-Z)
-      COMMON /GRVPAR/ ALP,BET,A,B,BA,BB,C,D,E,EP,SP
-      FL = ( X**A * (BA+BB*DSQRT(X)+C*X**B) +
-     &       S**ALP * DEXP(-E+DSQRT(-EP*S**BET*DLOG(X))) ) *
-     &     (1.D0-X)**D/X
-      RETURN
-      END
-      
+      FH = ( (S-a(11)) * X**a(1) * (a(3)+a(4)*DSQRT(X)+a(5)*X**a(2)) +
+     &     (S-a(11))**a(9) * DEXP(-a(6)+DSQRT(-a(7)*S**a(8)*DLOG(X))))*
+     &     (1.D0-X)**a(10)/X
+     
+      paraF2H = FH
+     
       
       end
 
-C#######################################################################
 
-
-
-
-
+C##########################################################
 
 
       double precision function para(x,a)
@@ -563,12 +582,12 @@ C-----------------------------------------------------
       implicit none
       double precision x,a(1:10)
       double precision AF
-      
+
       AF = a(1)*x**a(2)*(1 - x)**a(3)*(1 + a(4)*x
      $     + a(5)*x**2+a(6)*x**3+a(10)*x**0.5)-a(7)*x**a(8)*(1-x)**a(9)
       
       para = AF
-
+      
       end
 
 
@@ -790,9 +809,15 @@ c value in allowed range
       double precision x
       integer i
 C External function:
-      double precision PolyParam,ctpara,ctherapara,para,splogn
+      double precision PolyParam,ctpara,ctherapara,para,splogn,paraF2
 C-------------------------------------------------
-
+C#################################################
+C#    21 Aug 2017     S.Schulte  F2 fit
+      if (PDFStyle.eq.'F2_GAMMA') then
+         gluon = paraF2(x,ctglue)
+         return
+      endif
+C################################################
 
 C    22 Apr 11, SG, Add CTEQ-like
       if (PDFStyle.eq.'CTEQ') then
@@ -890,13 +915,21 @@ C---------------------------------
       implicit none
 #include "steering.inc"
 #include "pdfparam.inc"
-      double precision x,para
+      double precision x,para,paraF2
 
-
+C#################################################
+C#    21 Aug 2017     S.Schulte  F2 fit
+      if (PDFStyle.eq.'F2_GAMMA') then
+         print*, "F2 fit"
+         
+         H1U=paraF2(x,paru)
+         return
+      else
+C################################################
 
       H1U=para(x,paru)
-
-
+      endif
+    
       return
       end
 
@@ -906,11 +939,19 @@ C---------------------------------
       implicit none
 #include "steering.inc"
 #include "pdfparam.inc"
-      double precision x,para
-
+      double precision x,para,paraF2
+C#################################################
+C#    21 Aug 2017     S.Schulte  F2 fit
+      if (PDFStyle.eq.'F2_GAMMA') then
+         print*, "F2 H1D fit"
+         
+         H1D=paraF2(x,pard)
+         return
+      else
+C################################################
 
       H1D=para(x,pard)
-
+      endif
 
       return
       end
@@ -1104,7 +1145,7 @@ C-------------------------------------------------
       implicit none
 #include "steering.inc"
 #include "pdfparam.inc"
-      double precision x,sea,Dbar, para, ctpara,ctherapara
+      double precision x,sea,Dbar, para, ctpara,ctherapara,paraF2H
 C SG: x-dependent fs:
       double precision fs
       double precision fshermes
@@ -1114,6 +1155,18 @@ C----------------------------------------------------
       else
          fs = fshermes(x)
       endif
+      
+      
+C#################################################
+C#    21 Aug 2017     S.Schulte  F2 fit
+       if (PDFStyle.eq.'F2_GAMMA') then
+         qstrange = paraF2H(x,ctstr)
+         return
+       endif
+C################################################
+      
+      
+      
       
       if (PDFStyle.eq.'CTEQ') then
          qstrange = ctpara(x, ctstr)
@@ -1157,8 +1210,18 @@ cv      endif
       double precision x,pdf,q2
       dimension pdf(-N_CHARGE_PDF:N_CHARGE_PDF+N_NEUTRAL_PDF)
 
-      double precision sing,flav_number,QPDFXQ,vcplus,vicplus,cplus
+      double precision sing,flav_number,QPDFXQ,vcplus,vicplus,cplus,
+     & paraF2H
       integer iflag,iq0,iqc,iqfromq
+      
+      
+C#################################################
+C#    21 Aug 2017     S.Schulte  F2 fit
+      if (PDFStyle.eq.'F2_GAMMA') then
+         cbar = paraF2H(x,q2)
+         return
+      endif
+C################################################
 
       if (PDFStyle.eq.'CHEB'.or.PDFStyle.eq.'ZEUS Jet') then
          if (x.eq.1) goto 999
@@ -1188,9 +1251,18 @@ cv      endif
       double precision x,sea,dbmub,qstrange,cbar
       double precision sing,flav_number,QPDFXQ
       integer iflag,iq0,iqb,iqc,iqfromq,jtest
-      double precision ctpara,ctherapara,para, splogn
+      double precision ctpara,ctherapara,para, splogn,paraF2
 C----------------------------------------------
 * new2 jf SPECIAL TEST with dubar
+C#################################################
+C#    21 Aug 2017     S.Schulte  F2 fit
+      if (PDFStyle.eq.'F2_GAMMA') then
+         print*, "F2 H1D fit"
+         
+         Ubar=paraF2(x,ctubar)
+         return
+      endif
+C################################################
 
 C    22 Sep 11, VR, Add AS
       if ((PDFStyle.eq.'AS').or.(PDFStyle.eq.'BiLog')) then
@@ -1240,7 +1312,7 @@ cv     $        .or.iparam.eq.2011) then
 #include "steering.inc"
 #include "pdfparam.inc"
       double precision x,sea,Ubar
-      double precision ctpara,ctherapara,para,splogn
+      double precision ctpara,ctherapara,para,splogn,paraF2
 C SG: x-dependent fs:
       double precision fs
       double precision fshermes
@@ -1251,7 +1323,15 @@ C----------------------------------------------------
          fs = fshermes(x)
       endif
 C------------------------------------------------------------
-
+C#################################################
+C#    21 Aug 2017     S.Schulte  F2 fit
+      if (PDFStyle.eq.'F2_GAMMA') then
+         print*, "F2 H1D fit"
+         
+         Dbar=paraF2(x,ctdbar)
+         return
+      endif
+C################################################
 C    22 Sep 11, VR, Add AS
 
       if ((PDFStyle.eq.'AS').or.(PDFStyle.eq.'BiLog')) then

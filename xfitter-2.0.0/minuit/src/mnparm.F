@@ -45,6 +45,7 @@ CC
       CHARACTER  CNAMK*10, CHBUFI*4
 C
       CNAMK = CNAMJ
+      print*, CNAMK
       KINT = NPAR
       IF (K.LT.1 .OR. K.GT.MAXEXT) THEN
 C                     parameter number exceeds allowed maximum value
