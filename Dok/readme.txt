@@ -39,6 +39,7 @@ XFLIBS+=  -lc++
 end if 
 
 Change:
+Remove in Makefile :-stdlib=lc++
 _______________________________________________
 in src/Makefile.am und src/Makefile.in
 
