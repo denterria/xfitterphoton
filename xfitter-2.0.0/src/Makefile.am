@@ -156,7 +156,7 @@ XFLIBS =  ../DY/src/libmydy.a\
  ../DiffDIS/src/libDiffDIS.a\
  ../interfaces/src/libinterfaces.a\
  ../minuit/src/libmyminuit.a $(CERNLIBS) @FLIBS@ \
-  -lstdc++ \
+  -lc++ \
  ../genetic/src/libgenetic.a \
  ../QEDevol/src/libQEDevol.a \
  ../common/num_utils/libnum_utils.a \
